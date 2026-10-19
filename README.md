@@ -51,6 +51,7 @@ The checked-in PNGs are ready to load in Chrome. To regenerate them after editin
 npm install --no-save --package-lock=false @resvg/resvg-js@2.6.2
 node scripts/render-icons.cjs
 node test/icons.test.js
+node test/webstore.test.js      # store deployment checks with mocked API responses
 ```
 
 The build-only renderer reads sizes and output paths from `manifest.json`, including toolbar icons. The dependency-free asset test checks both vector sources and all four PNGs for manifest references, integrity, dimensions, and transparency. See [icons/README.md](icons/README.md) for source details and visual inspection guidance.
@@ -73,6 +74,8 @@ node scripts/package.cjs
 
 Writes `dist/cooldown-for-chatgpt-<version>.zip` with only the files the extension loads (derived from the manifest, `importScripts` and `popup.html`). No dependencies.
 
+For GitHub Actions uploads and review submissions, see the [Chrome Web Store release guide](docs/webstore-release.md).
+
 Store assets in `store/` are rendered from the real panel and popup code with sample data:
 
 ```sh
@@ -86,7 +89,9 @@ Waiting out the countdown does not always fix ChatGPT's "Could not load this Cha
 
 ## Contributing
 
-Contributions are welcome: bug reports (ideally with what the panel and popup showed), ideas, and pull requests. ChatGPT's endpoints and error UI change without notice, so reports of new endpoint paths or error texts are especially useful. Please run the tests listed above before opening a pull request.
+Contributions in English and Korean are welcome. See the [contribution guide](CONTRIBUTING.md) for setup, checks, and reporting guidance, and the [Code of Conduct](CODE_OF_CONDUCT.md) for community expectations.
+
+Use the [issue forms](https://github.com/snowmuffin/cooldown-for-chatgpt/issues/new/choose) for bug reports and ideas. Remove private conversation data from reports. For vulnerabilities, follow the [security policy](SECURITY.md).
 
 ## License
 

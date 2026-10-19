@@ -1,0 +1,42 @@
+name: Bug report / 버그 제보
+description: Report an extension problem with steps to reproduce it.
+body:
+  - type: markdown
+    attributes:
+      value: |
+        English and Korean reports are welcome. 한국어로 작성해도 됩니다.
+        Remove conversation IDs, chat contents, email addresses, cookies, and tokens.
+        Do not upload raw HAR files or full network responses. Redact screenshots.
+        For security vulnerabilities, use the private reporting link on the issue chooser.
+  - type: input
+    id: environment
+    attributes:
+      label: Environment / 사용 환경
+      description: OS, Chrome version, extension version, and installation method (unpacked or store).
+    validations:
+      required: true
+  - type: textarea
+    id: steps
+    attributes:
+      label: Steps to reproduce / 재현 방법
+      description: Describe navigation, reloads, and whether optional auto reload was enabled. Do not include private chat links.
+    validations:
+      required: true
+  - type: textarea
+    id: expected
+    attributes:
+      label: Expected behavior / 예상 동작
+    validations:
+      required: true
+  - type: textarea
+    id: actual
+    attributes:
+      label: Actual behavior / 실제 동작
+      description: Include the panel and popup messages, if available.
+    validations:
+      required: true
+  - type: textarea
+    id: evidence
+    attributes:
+      label: Optional diagnostic evidence / 진단 정보 (선택)
+      description: HTTP status, Retry-After values, and endpoint pattern (replace IDs with <id>). Distinguish observed facts from suspected causes.

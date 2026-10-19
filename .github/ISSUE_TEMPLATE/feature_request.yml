@@ -1,0 +1,23 @@
+name: Feature request / 기능 제안
+description: Describe a problem the extension could help solve.
+body:
+  - type: markdown
+    attributes:
+      value: English and Korean are welcome. Please leave out private conversation data.
+  - type: textarea
+    id: problem
+    attributes:
+      label: Problem / 해결할 문제
+      description: What are you trying to do, and what gets in the way?
+    validations:
+      required: true
+  - type: textarea
+    id: proposal
+    attributes:
+      label: Proposed behavior / 제안하는 동작
+    validations:
+      required: true
+  - type: textarea
+    id: alternatives
+    attributes:
+      label: Alternatives / 대안 (선택)
