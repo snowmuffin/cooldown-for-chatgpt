@@ -18,20 +18,20 @@ Copy for the developer dashboard. Images in this folder are rendered by `scripts
 
 ## Description — English
 
-When ChatGPT says "Unable to load conversation" or a request quietly fails, the reason is often rate limiting: the server answered with HTTP 429 and a Retry-After header telling the browser how long to wait. The ChatGPT web app doesn't show that number. Cooldown for ChatGPT does.
+When ChatGPT says "Could not load this ChatGPT conversation" or a request quietly fails, the reason is often rate limiting: the server answered with HTTP 429 and a Retry-After header telling the browser how long to wait. The ChatGPT web app doesn't show that number. Cooldown for ChatGPT does.
 
 What it does
 • Shows a small panel with a live countdown for each rate-limited request. It uses the same time ChatGPT itself uses to block its Retry button, so you know when Retry can work at all
 • Turns green when retrying is allowed, and flags 429 responses that came without a wait time
-• When ChatGPT shows its conversation load error, reports what was actually observed for that conversation: an elapsed wait, a network-level failure, a request that succeeded, or nothing recorded
+• When ChatGPT shows its conversation load error, reports what was actually observed for that conversation: a wait still running or over, a page that never requested the chat, a network-level failure, a request that succeeded, or nothing recorded. A 429 from before a reload is still mentioned
 • Shows a 429 badge on the toolbar icon while a limit is active
 • Keeps a short history of recent 429s and network errors in the toolbar popup
-• Optional auto reload (off by default): once the wait is over, reloads the tab that couldn't load the chat. It never reloads early, never touches other tabs, waits while you have unsent text, and stops after 3 reloads in 10 minutes.
+• Optional auto reload (off by default): once the wait is over, reloads the tab that couldn't load the chat. It never reloads early, never touches other tabs, waits while you have unsent text, waits longer before each further reload, and stops after 3 reloads in 10 minutes.
 • English and Korean interface (English by default, switch in the popup)
 
 What it doesn't do
 • It only reads response status and headers. It never blocks or modifies requests, never sends requests of its own, and doesn't try to get around limits.
-• It doesn't read your messages or ChatGPT's replies.
+• It doesn't read your messages or ChatGPT's replies. On the page it only looks for ChatGPT's error text and, before an auto reload, whether the message box is empty; nothing from the page is stored or sent.
 • It collects nothing and sends nothing anywhere. Observations live in memory and are cleared when the browser restarts.
 
 Good to know
@@ -48,15 +48,15 @@ ChatGPT에서 "이 ChatGPT 대화를 불러올 수 없습니다"가 뜨거나 �
 기능
 • 사용량 제한에 걸린 요청마다 작은 패널에 실시간 카운트다운 표시. ChatGPT가 자체적으로 '다시 시도'를 막아 두는 시각과 같은 기준이라, 언제부터 다시 시도가 의미 있는지 알 수 있음
 • 다시 시도해도 되는 시점에 초록색으로 전환, 대기 시간 없이 온 429도 따로 표시
-• ChatGPT가 대화 불러오기 오류를 띄우면, 그 대화에서 실제로 관측된 내용(대기 시간 경과, 네트워크 오류, 성공한 요청, 기록 없음)을 알려줌
+• ChatGPT가 대화 불러오기 오류를 띄우면, 그 대화에서 실제로 관측된 내용(대기 중·대기 끝남, 페이지가 대화를 요청하지 않음, 네트워크 오류, 성공한 요청, 기록 없음)을 알려줌. 새로고침 전에 난 429도 함께 표시
 • 제한이 걸려 있는 동안 툴바 아이콘에 429 배지 표시
 • 툴바 팝업에서 최근 429와 네트워크 오류 기록 확인
-• 선택 기능인 자동 새로고침(기본 꺼짐): 대기 시간이 끝나면 대화를 불러오지 못한 그 탭만 새로고침합니다. 대기 시간 전에는 절대 새로고침하지 않고, 입력 중인 글이 있으면 기다리며, 10분에 3번을 넘기면 멈춥니다.
+• 선택 기능인 자동 새로고침(기본 꺼짐): 대기 시간이 끝나면 대화를 불러오지 못한 그 탭만 새로고침합니다. 대기 시간 전에는 절대 새로고침하지 않고, 입력 중인 글이 있으면 기다리며, 다시 새로고침할수록 더 오래 기다리고, 10분에 3번을 넘기면 멈춥니다.
 • 영어·한국어 지원(기본은 영어, 팝업에서 한국어 선택)
 
 하지 않는 것
 • 응답 상태와 헤더만 읽습니다. 요청을 차단·변경하거나 직접 요청을 보내지 않으며, 제한을 우회하지 않습니다.
-• 메시지나 ChatGPT의 답변을 읽지 않습니다.
+• 메시지나 ChatGPT의 답변을 읽지 않습니다. 페이지에서는 ChatGPT의 오류 문구와, 자동 새로고침 전 입력창이 비어 있는지만 확인하며 페이지 내용은 저장하거나 보내지 않습니다.
 • 아무것도 수집하거나 전송하지 않습니다. 관측 기록은 메모리에만 있고 브라우저를 다시 시작하면 지워집니다.
 
 알아 두실 점
