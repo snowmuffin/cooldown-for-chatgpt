@@ -1,0 +1,183 @@
+{
+  "extName": {
+    "message": "Cooldown for ChatGPT"
+  },
+  "extDescription": {
+    "message": "ChatGPT가 HTTP 429를 반환하면 Retry-After 헤더의 남은 대기 시간을 실시간으로 보여줍니다. OpenAI와 무관한 독립 프로젝트입니다."
+  },
+  "panelClose": {
+    "message": "닫기"
+  },
+  "epList": {
+    "message": "대화 목록"
+  },
+  "epInit": {
+    "message": "대화 열기"
+  },
+  "epLoad": {
+    "message": "대화 불러오기"
+  },
+  "epSend": {
+    "message": "메시지 보내기"
+  },
+  "rowNoHeader": {
+    "message": "대기 시간 모름"
+  },
+  "rowReady": {
+    "message": "재시도 가능"
+  },
+  "rowTooltipNoHeader": {
+    "message": "(헤더 없음)"
+  },
+  "rowTooltipReceived": {
+    "message": "수신: $TIME$",
+    "placeholders": {
+      "time": {
+        "content": "$1"
+      }
+    }
+  },
+  "diagElapsed": {
+    "message": "마지막 429의 대기 시간이 끝났습니다. 지금 다시 시도해 볼 수 있습니다."
+  },
+  "diagElapsedDetail": {
+    "message": "429 · Retry-After $RAW$ · $WHERE$",
+    "placeholders": {
+      "raw": {
+        "content": "$1"
+      },
+      "where": {
+        "content": "$2"
+      }
+    }
+  },
+  "diagNoWait": {
+    "message": "사용량 제한(429)에 걸렸지만 대기 시간 정보가 없습니다."
+  },
+  "diagNoWaitDetail": {
+    "message": "429 · Retry-After 없음 · $WHERE$",
+    "placeholders": {
+      "where": {
+        "content": "$1"
+      }
+    }
+  },
+  "diagNetErr": {
+    "message": "대화 요청이 네트워크 오류로 실패했습니다 ($ERROR$).",
+    "placeholders": {
+      "error": {
+        "content": "$1"
+      }
+    }
+  },
+  "diagNetErrAfterHeaders": {
+    "message": "대화를 받는 도중 연결이 끊겼습니다 ($ERROR$).",
+    "placeholders": {
+      "error": {
+        "content": "$1"
+      }
+    }
+  },
+  "diagNetErrAfterHeadersDetail": {
+    "message": "$WHERE$ · 상태 $STATUS$ 수신 후 실패",
+    "placeholders": {
+      "where": {
+        "content": "$1"
+      },
+      "status": {
+        "content": "$2"
+      }
+    }
+  },
+  "diagOk": {
+    "message": "마지막 대화 요청은 성공했습니다. 오류 원인은 관측되지 않았습니다."
+  },
+  "diagNone": {
+    "message": "이 대화에서 관측된 사용량 제한이 없습니다. 원인은 알 수 없습니다."
+  },
+  "diagNoneDetail": {
+    "message": "이 페이지에서 이 대화의 요청을 보지 못했습니다."
+  },
+  "reloadIn": {
+    "message": "$TIME$ 후 이 탭을 새로고침합니다",
+    "placeholders": {
+      "time": {
+        "content": "$1"
+      }
+    }
+  },
+  "reloadNow": {
+    "message": "이 탭을 새로고침하는 중…"
+  },
+  "reloadPausedDraft": {
+    "message": "새로고침 대기 중: 입력창에 보내지 않은 글이 있습니다."
+  },
+  "reloadLimited": {
+    "message": "$MINUTES$분 동안 $COUNT$번 새로고침해서 자동 새로고침을 멈췄습니다.",
+    "placeholders": {
+      "count": {
+        "content": "$1"
+      },
+      "minutes": {
+        "content": "$2"
+      }
+    }
+  },
+  "reloadFailed": {
+    "message": "이 탭을 새로고침하지 못했습니다."
+  },
+  "reloadCancel": {
+    "message": "취소"
+  },
+  "popupAutoReload": {
+    "message": "대기가 끝나면 자동 새로고침"
+  },
+  "popupAutoReloadHelp": {
+    "message": "429 때문에 ChatGPT가 대화를 불러오지 못할 때만 동작합니다. 탭마다 $MINUTES$분에 최대 $COUNT$번.",
+    "placeholders": {
+      "count": {
+        "content": "$1"
+      },
+      "minutes": {
+        "content": "$2"
+      }
+    }
+  },
+  "popupLanguage": {
+    "message": "언어"
+  },
+  "popupTitle": {
+    "message": "최근 기록"
+  },
+  "popupClear": {
+    "message": "지우기"
+  },
+  "popupEmpty": {
+    "message": "아직 기록이 없습니다"
+  },
+  "popupEmptyHelp": {
+    "message": "chatgpt.com의 사용량 제한(429)과 네트워크 오류가 여기에 표시됩니다."
+  },
+  "popupKindNetwork": {
+    "message": "네트워크"
+  },
+  "popupAfterStatus": {
+    "message": "$ERROR$ (상태 $STATUS$ 후)",
+    "placeholders": {
+      "error": {
+        "content": "$1"
+      },
+      "status": {
+        "content": "$2"
+      }
+    }
+  },
+  "popupWait": {
+    "message": "대기 $TIME$",
+    "placeholders": {
+      "time": {
+        "content": "$1"
+      }
+    }
+  }
+}

@@ -1,0 +1,117 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Cooldown for ChatGPT — Privacy Policy</title>
+  <style>
+    :root { --bg: #fff; --fg: #202124; --muted: #5f6368; --line: #e8eaed; --accent: #0b7f6f; }
+    @media (prefers-color-scheme: dark) {
+      :root { --bg: #18191b; --fg: #e8eaed; --muted: #9aa0a6; --line: #3c4043; --accent: #5fd3b5; }
+    }
+    body { margin: 0; background: var(--bg); color: var(--fg); font: 16px/1.6 system-ui, sans-serif; }
+    main { max-width: 720px; margin: 0 auto; padding: 32px 16px 64px; }
+    h1 { font-size: 26px; margin: 0 0 4px; }
+    h2 { font-size: 19px; margin: 32px 0 8px; }
+    .meta { color: var(--muted); margin: 0 0 24px; }
+    nav a, a { color: var(--accent); }
+    hr { border: 0; border-top: 1px solid var(--line); margin: 48px 0; }
+    code { font-size: .92em; }
+    li { margin: 4px 0; }
+  </style>
+</head>
+<body>
+<main>
+  <nav><a href="#en">English</a> · <a href="#ko">한국어</a></nav>
+
+  <section id="en" lang="en">
+    <h1>Privacy Policy</h1>
+    <p class="meta">Cooldown for ChatGPT · Last updated: October 19, 2026 (auto reload added)</p>
+
+    <p><strong>Cooldown for ChatGPT does not collect, transmit, sell, or share any data.</strong>
+      It has no server, no analytics, and no remote code. Everything it observes stays in your browser.</p>
+
+    <h2>What the extension reads</h2>
+    <p>On <code>https://chatgpt.com</code> only, the extension observes the outcome of the page's own network requests:</p>
+    <ul>
+      <li>the request method and URL (path and query, which can include a conversation ID),</li>
+      <li>the HTTP status code and, for HTTP 429 responses, the <code>Retry-After</code> header,</li>
+      <li>network error codes (for example <code>net::ERR_ABORTED</code>) and timestamps.</li>
+    </ul>
+    <p>It never reads request or response bodies, so it never sees your messages, ChatGPT's replies,
+      your account details, cookies, or passwords. It does not block or modify any request.</p>
+
+    <h2>Where it is kept</h2>
+    <p>Observations are kept in <code>chrome.storage.session</code>, which lives in memory on your device.
+      It is cleared when you close a tab (for that tab), when the browser restarts, or when the extension is
+      updated or disabled. The history list in the popup keeps at most 50 entries, and you can clear it at any time.
+      The only things written to disk are your two settings (auto reload on/off and the interface language), in <code>chrome.storage.local</code>.
+      Nothing leaves your device.</p>
+
+    <h2>Auto reload</h2>
+    <p>Auto reload is off by default. When you turn it on, the extension reloads a chatgpt.com tab only when that tab
+      shows ChatGPT's "can't load this chat" error caused by a 429, and only after the server's
+      <code>Retry-After</code> time has passed. It reloads that tab and no other, at most 3 times in 10 minutes per tab,
+      and waits while the message box holds unsent text.</p>
+
+    <h2>Permissions</h2>
+    <ul>
+      <li><code>webRequest</code> — read response status and headers of chatgpt.com requests. Nothing is blocked or changed.</li>
+      <li><code>storage</code> — keep the in-memory state described above.</li>
+      <li><code>alarms</code> — remove expired entries on time.</li>
+      <li>Host access to <code>https://chatgpt.com/*</code> — the only site the extension runs on.</li>
+    </ul>
+
+    <h2>Changes and contact</h2>
+    <p>Changes to this policy are published on this page and in the
+      <a href="https://github.com/snowmuffin/cooldown-for-chatgpt">source repository</a>.
+      Questions can be filed as an <a href="https://github.com/snowmuffin/cooldown-for-chatgpt/issues">issue</a>.</p>
+    <p>Independent project. Not affiliated with or endorsed by OpenAI.</p>
+  </section>
+
+  <hr>
+
+  <section id="ko" lang="ko">
+    <h1>개인정보처리방침</h1>
+    <p class="meta">Cooldown for ChatGPT · 최종 수정일: 2026년 10월 19일 (자동 새로고침 추가)</p>
+
+    <p><strong>Cooldown for ChatGPT는 어떤 데이터도 수집, 전송, 판매, 공유하지 않습니다.</strong>
+      서버, 분석 도구, 원격 코드가 없으며 관측한 내용은 모두 브라우저 안에만 머뭅니다.</p>
+
+    <h2>확장 프로그램이 읽는 정보</h2>
+    <p><code>https://chatgpt.com</code>에서만, 페이지가 스스로 보내는 네트워크 요청의 결과를 관측합니다.</p>
+    <ul>
+      <li>요청 메서드와 URL(경로와 쿼리, 대화 ID가 포함될 수 있음)</li>
+      <li>HTTP 상태 코드, 그리고 429 응답의 <code>Retry-After</code> 헤더</li>
+      <li>네트워크 오류 코드(예: <code>net::ERR_ABORTED</code>)와 시각</li>
+    </ul>
+    <p>요청과 응답의 본문은 읽지 않습니다. 따라서 메시지 내용, ChatGPT의 답변, 계정 정보, 쿠키, 비밀번호를
+      볼 수 없습니다. 어떤 요청도 차단하거나 변경하지 않습니다.</p>
+
+    <h2>보관 위치</h2>
+    <p>관측 내용은 기기 메모리에 있는 <code>chrome.storage.session</code>에 보관됩니다. 탭을 닫으면 해당 탭의 기록이,
+      브라우저를 다시 시작하거나 확장 프로그램을 업데이트·비활성화하면 전체가 지워집니다. 팝업의 기록 목록은 최대 50개이며
+      언제든 지울 수 있습니다. 디스크에 저장하는 것은 설정 두 가지(자동 새로고침 켜기/끄기, 표시 언어, <code>chrome.storage.local</code>)뿐이며,
+      기기 밖으로는 아무것도 보내지 않습니다.</p>
+
+    <h2>자동 새로고침</h2>
+    <p>자동 새로고침은 기본으로 꺼져 있습니다. 켜면, chatgpt.com 탭이 429 때문에 "대화를 불러올 수 없습니다" 오류를 띄웠을 때만,
+      그리고 서버가 알려준 <code>Retry-After</code> 시간이 지난 뒤에만 그 탭을 새로고침합니다. 다른 탭은 건드리지 않으며,
+      탭마다 10분에 최대 3번까지이고, 입력창에 보내지 않은 글이 있으면 기다립니다.</p>
+
+    <h2>권한</h2>
+    <ul>
+      <li><code>webRequest</code> — chatgpt.com 요청의 응답 상태와 헤더를 읽습니다. 차단하거나 변경하지 않습니다.</li>
+      <li><code>storage</code> — 위에서 설명한 메모리 내 상태를 보관합니다.</li>
+      <li><code>alarms</code> — 만료된 기록을 제때 지웁니다.</li>
+      <li><code>https://chatgpt.com/*</code> 접근 — 확장 프로그램이 동작하는 유일한 사이트입니다.</li>
+    </ul>
+
+    <h2>변경 및 문의</h2>
+    <p>이 방침의 변경 사항은 이 페이지와 <a href="https://github.com/snowmuffin/cooldown-for-chatgpt">소스 저장소</a>에 게시됩니다.
+      문의는 <a href="https://github.com/snowmuffin/cooldown-for-chatgpt/issues">이슈</a>로 남겨 주세요.</p>
+    <p>독립 프로젝트이며 OpenAI와 제휴하거나 보증받지 않았습니다.</p>
+  </section>
+</main>
+</body>
+</html>

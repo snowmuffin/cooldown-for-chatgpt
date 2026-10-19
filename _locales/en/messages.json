@@ -1,0 +1,217 @@
+{
+  "extName": {
+    "message": "Cooldown for ChatGPT",
+    "description": "Extension name. Keep in English; 'ChatGPT' only names the supported site."
+  },
+  "extDescription": {
+    "message": "Shows a live countdown from the Retry-After header when ChatGPT returns HTTP 429. Not affiliated with OpenAI.",
+    "description": "Manifest description, max 132 characters."
+  },
+  "panelClose": {
+    "message": "Close",
+    "description": "Tooltip and accessible name of the panel's close button."
+  },
+  "epList": {
+    "message": "Chat list",
+    "description": "Name for the request that loads the sidebar chat list."
+  },
+  "epInit": {
+    "message": "Opening a chat",
+    "description": "Name for conversation/init."
+  },
+  "epLoad": {
+    "message": "Loading a chat",
+    "description": "Name for the request that loads one conversation."
+  },
+  "epSend": {
+    "message": "Sending a message",
+    "description": "Name for the request that sends a prompt."
+  },
+  "rowNoHeader": {
+    "message": "Wait unknown",
+    "description": "Shown instead of a countdown when a 429 had no Retry-After header."
+  },
+  "rowReady": {
+    "message": "Ready",
+    "description": "Shown when the countdown has reached zero."
+  },
+  "rowTooltipNoHeader": {
+    "message": "(no header)",
+    "description": "Tooltip value when the Retry-After header was missing."
+  },
+  "rowTooltipReceived": {
+    "message": "Received: $TIME$",
+    "placeholders": {
+      "time": {
+        "content": "$1",
+        "example": "10:42:07"
+      }
+    }
+  },
+  "diagElapsed": {
+    "message": "The wait from the last 429 is over. Retrying may work now.",
+    "description": "The last 429 for this chat has run out its Retry-After. Recovery is not confirmed, so do not say it will work."
+  },
+  "diagElapsedDetail": {
+    "message": "429 · Retry-After $RAW$ · $WHERE$",
+    "placeholders": {
+      "raw": {
+        "content": "$1",
+        "example": "47"
+      },
+      "where": {
+        "content": "$2",
+        "example": "GET /conversation/6acde5a1…"
+      }
+    }
+  },
+  "diagNoWait": {
+    "message": "Rate limited (429), but no wait time was given."
+  },
+  "diagNoWaitDetail": {
+    "message": "429 · no Retry-After · $WHERE$",
+    "placeholders": {
+      "where": {
+        "content": "$1",
+        "example": "GET /conversation/6acde5a1…"
+      }
+    }
+  },
+  "diagNetErr": {
+    "message": "The chat request failed with a network error ($ERROR$).",
+    "placeholders": {
+      "error": {
+        "content": "$1",
+        "example": "net::ERR_ABORTED"
+      }
+    }
+  },
+  "diagNetErrAfterHeaders": {
+    "message": "The connection dropped while the chat was loading ($ERROR$).",
+    "placeholders": {
+      "error": {
+        "content": "$1",
+        "example": "net::ERR_INCOMPLETE_CHUNKED_ENCODING"
+      }
+    }
+  },
+  "diagNetErrAfterHeadersDetail": {
+    "message": "$WHERE$ · failed after status $STATUS$",
+    "placeholders": {
+      "where": {
+        "content": "$1",
+        "example": "GET /conversation/6acde5a1…"
+      },
+      "status": {
+        "content": "$2",
+        "example": "200"
+      }
+    }
+  },
+  "diagOk": {
+    "message": "The last chat request succeeded. The cause wasn't observed."
+  },
+  "diagNone": {
+    "message": "No rate limit was seen for this chat. The cause is unknown.",
+    "description": "Nothing was observed. Must not claim the error is not a 429."
+  },
+  "diagNoneDetail": {
+    "message": "No requests for this chat were seen on this page."
+  },
+  "reloadIn": {
+    "message": "Reloading this tab in $TIME$",
+    "placeholders": {
+      "time": {
+        "content": "$1",
+        "example": "0:47"
+      }
+    }
+  },
+  "reloadNow": {
+    "message": "Reloading this tab…"
+  },
+  "reloadPausedDraft": {
+    "message": "Waiting to reload: the message box has unsent text."
+  },
+  "reloadLimited": {
+    "message": "Auto reload stopped after $COUNT$ reloads in $MINUTES$ minutes.",
+    "placeholders": {
+      "count": {
+        "content": "$1",
+        "example": "3"
+      },
+      "minutes": {
+        "content": "$2",
+        "example": "10"
+      }
+    }
+  },
+  "reloadFailed": {
+    "message": "Couldn't reload this tab."
+  },
+  "reloadCancel": {
+    "message": "Cancel",
+    "description": "Button that cancels the pending auto reload."
+  },
+  "popupAutoReload": {
+    "message": "Reload when the wait is over",
+    "description": "Popup switch label."
+  },
+  "popupAutoReloadHelp": {
+    "message": "Only when ChatGPT can't load a chat because of a 429. Up to $COUNT$ times in $MINUTES$ minutes per tab.",
+    "placeholders": {
+      "count": {
+        "content": "$1",
+        "example": "3"
+      },
+      "minutes": {
+        "content": "$2",
+        "example": "10"
+      }
+    }
+  },
+  "popupLanguage": {
+    "message": "Language",
+    "description": "Accessible name of the popup language selector."
+  },
+  "popupTitle": {
+    "message": "Recent activity",
+    "description": "Popup heading above the history list."
+  },
+  "popupClear": {
+    "message": "Clear",
+    "description": "Popup button that clears the history list."
+  },
+  "popupEmpty": {
+    "message": "Nothing recorded yet"
+  },
+  "popupEmptyHelp": {
+    "message": "Rate limits (429) and network errors on chatgpt.com will appear here."
+  },
+  "popupKindNetwork": {
+    "message": "Network",
+    "description": "History label for a network-level failure (as opposed to a 429). Keep short."
+  },
+  "popupAfterStatus": {
+    "message": "$ERROR$ (after status $STATUS$)",
+    "placeholders": {
+      "error": {
+        "content": "$1",
+        "example": "net::ERR_ABORTED"
+      },
+      "status": {
+        "content": "$2",
+        "example": "200"
+      }
+    }
+  },
+  "popupWait": {
+    "message": "Wait $TIME$",
+    "placeholders": {
+      "time": {
+        "content": "$1",
+        "example": "0:47"
+      }
+    }
+  }
+}

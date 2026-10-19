@@ -1,0 +1,36 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="128" height="128" viewBox="0 0 128 128" role="img" aria-labelledby="title desc">
+  <title id="title">Cooldown compact</title>
+  <desc id="desc">A compact teal speech bubble and enlarged clock badge, optically adjusted for 16 and 32 pixel toolbar icons. No third-party logo.</desc>
+  <defs>
+    <linearGradient id="bubble" x1="29" y1="16" x2="80" y2="104" gradientUnits="userSpaceOnUse">
+      <stop stop-color="#38bd9a"/>
+      <stop offset="0.52" stop-color="#129e87"/>
+      <stop offset="1" stop-color="#04665f"/>
+    </linearGradient>
+    <linearGradient id="whiteRim" x1="25" y1="18" x2="84" y2="101" gradientUnits="userSpaceOnUse">
+      <stop stop-color="#ffffff"/>
+      <stop offset="1" stop-color="#e4f3ef"/>
+    </linearGradient>
+    <linearGradient id="clockRim" x1="79" y1="64" x2="104" y2="119" gradientUnits="userSpaceOnUse">
+      <stop stop-color="#51dcba"/>
+      <stop offset="0.4" stop-color="#12b79a"/>
+      <stop offset="1" stop-color="#00776f"/>
+    </linearGradient>
+    <linearGradient id="face" x1="84" y1="72" x2="106" y2="114" gradientUnits="userSpaceOnUse">
+      <stop stop-color="#ffffff"/>
+      <stop offset="1" stop-color="#e7f3f0"/>
+    </linearGradient>
+    <path id="bubbleShape" d="M56 12C31 12 11 31 11 55C11 66.5 15.5 76.6 23 84.6L18 100C16.6 104.5 19.8 107.5 24 105.6L40 98.1C45.3 100.1 50.4 101.1 56 101.1C81 101.1 101 80.4 101 55C101 31 81 12 56 12Z"/>
+  </defs>
+  <use href="#bubbleShape" fill="url(#bubble)" stroke="#06292d" stroke-width="16" stroke-linejoin="round"/>
+  <use href="#bubbleShape" fill="url(#bubble)" stroke="url(#whiteRim)" stroke-width="8" stroke-linejoin="round"/>
+  <g fill="#f6fcfa">
+    <circle cx="36" cy="54" r="6"/>
+    <circle cx="55" cy="54" r="6"/>
+    <circle cx="74" cy="54" r="6"/>
+  </g>
+  <circle cx="92" cy="91" r="32" fill="#04272b"/>
+  <circle cx="92" cy="91" r="28" fill="url(#clockRim)"/>
+  <circle cx="92" cy="91" r="23" fill="url(#face)"/>
+  <path d="M92 77V91L103 99" fill="none" stroke="#06292d" stroke-width="7.5" stroke-linecap="round" stroke-linejoin="round"/>
+</svg>

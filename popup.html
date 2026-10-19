@@ -1,0 +1,91 @@
+<!doctype html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <title>Cooldown for ChatGPT</title>
+  <style>
+    :root {
+      --bg: #fff; --fg: #1d2523; --muted: #5c6b67; --line: #e5ebe9; --hover: #f2f6f5;
+      --accent: #0b7f6f; --track: #c9d3d0; --k429: #c5221f; --kerror: #1a5fc4;
+      color-scheme: light;
+    }
+    @media (prefers-color-scheme: dark) {
+      :root {
+        --bg: #1a2022; --fg: #eef4f2; --muted: #9fb3ae; --line: #2c3537; --hover: #232b2d;
+        --accent: #5fd3b5; --track: #46524f; --k429: #ff8f7a; --kerror: #8ab8ff;
+        color-scheme: dark;
+      }
+    }
+    * { box-sizing: border-box; }
+    body { margin: 0; width: 360px; background: var(--bg); color: var(--fg); font: 13px/1.45 system-ui, sans-serif;
+      word-break: keep-all; overflow-wrap: break-word; }
+    button, input { font: inherit; color: inherit; }
+    :focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+
+    .brand { display: flex; align-items: center; gap: 8px; padding: 12px 14px 10px; }
+    .brand img { width: 20px; height: 20px; }
+    .brand h1 { flex: 1; margin: 0; font-size: 13px; font-weight: 600; }
+    .language { padding: 2px 4px; border: 1px solid var(--line); border-radius: 6px; background: var(--bg);
+      font-size: 12px; color: var(--muted); cursor: pointer; }
+    .language:hover { background: var(--hover); }
+
+    .setting { display: flex; align-items: flex-start; gap: 12px; margin: 0 10px; padding: 10px 12px;
+      border: 1px solid var(--line); border-radius: 10px; cursor: pointer; }
+    .setting:hover { background: var(--hover); }
+    .setting-text { flex: 1; }
+    .setting-title { display: block; font-weight: 500; }
+    .setting-help { display: block; margin-top: 2px; font-size: 12px; color: var(--muted); }
+    .switch { appearance: none; flex: none; position: relative; width: 32px; height: 18px; margin: 1px 0 0;
+      border-radius: 9px; background: var(--track); cursor: pointer; transition: background-color .15s; }
+    .switch::after { content: ""; position: absolute; top: 2px; left: 2px; width: 14px; height: 14px;
+      border-radius: 50%; background: #fff; box-shadow: 0 1px 2px rgba(0,0,0,.25); transition: transform .15s; }
+    .switch:checked { background: var(--accent); }
+    .switch:checked::after { transform: translateX(14px); }
+    @media (prefers-reduced-motion: reduce) { .switch, .switch::after { transition: none; } }
+
+    .section-head { display: flex; align-items: center; justify-content: space-between; padding: 14px 14px 6px; }
+    h2 { margin: 0; font-size: 12px; font-weight: 600; color: var(--muted); }
+    .clear { padding: 2px 8px; border: 0; border-radius: 6px; background: none; color: var(--accent); cursor: pointer; }
+    .clear:hover { background: var(--hover); }
+    .clear:disabled { color: var(--muted); opacity: .5; cursor: default; background: none; }
+
+    ol { list-style: none; margin: 0; padding: 0 0 6px; max-height: 360px; overflow-y: auto; }
+    li { display: grid; grid-template-columns: 1fr auto; gap: 1px 12px; padding: 7px 14px; border-top: 1px solid var(--line); }
+    .label { display: flex; align-items: baseline; gap: 6px; min-width: 0; font-weight: 500; }
+    .label span:last-child { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+    .kind { flex: none; min-width: 52px; font-size: 11px; font-weight: 600; font-variant-numeric: tabular-nums; }
+    .k429 { color: var(--k429); } .kerror { color: var(--kerror); }
+    .extra { justify-self: end; max-width: 150px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;
+      font-variant-numeric: tabular-nums; }
+    .meta, time { font-size: 12px; color: var(--muted); }
+    .meta { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+    time { justify-self: end; font-variant-numeric: tabular-nums; }
+
+    .empty { display: block; padding: 22px 14px 26px; border-top: 1px solid var(--line); text-align: center; }
+    .empty p { margin: 0; }
+    .empty p + p { margin-top: 4px; font-size: 12px; color: var(--muted); }
+  </style>
+</head>
+<body>
+  <header class="brand">
+    <img src="icons/icon32.png" alt=""><h1 data-i18n="extName"></h1>
+    <!-- Language names are written in their own language, so they are not translated. -->
+    <select id="language" class="language">
+      <option value="en" lang="en">English</option>
+      <option value="ko" lang="ko">한국어</option>
+    </select>
+  </header>
+  <label class="setting">
+    <span class="setting-text">
+      <span class="setting-title" id="auto-title" data-i18n="popupAutoReload"></span>
+      <span class="setting-help" id="auto-help" data-i18n="popupAutoReloadHelp"></span>
+    </span>
+    <input class="switch" id="auto-reload" type="checkbox" role="switch" aria-labelledby="auto-title" aria-describedby="auto-help">
+  </label>
+  <div class="section-head"><h2 data-i18n="popupTitle"></h2><button class="clear" id="clear" type="button" data-i18n="popupClear"></button></div>
+  <ol id="list"></ol>
+  <script src="retry-after.js"></script>
+  <script src="common.js"></script>
+  <script src="popup.js"></script>
+</body>
+</html>
