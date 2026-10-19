@@ -3,9 +3,14 @@
 // auto reload once the wait is over.
 // Relies on helpers from common.js.
 (() => {
-  // ChatGPT's load-error line (ko/en). Matched as a whole short line, not as a substring of prose.
-  const ERROR_LINE = /^(이 )?ChatGPT 대화를 불러올 수 없습니다\.?$|^Unable to load conversation\b.{0,60}$/;
-  const ERROR_XPATH = "//text()[contains(., '대화를 불러올 수 없습니다') or contains(., 'Unable to load conversation')]";
+  // ChatGPT's conversation load error (message id chatgptConversations.loadError). The search,
+  // the change filter and the whole-line check below all use this one list. The current English
+  // text is "Could not load this ChatGPT conversation"; "Unable to load conversation" is older.
+  const ERROR_PHRASES = ['대화를 불러올 수 없습니다', 'Could not load this ChatGPT conversation', 'Unable to load conversation'];
+  // Matched as a whole short line, not as a substring of prose.
+  const ERROR_LINE = /^(이 )?ChatGPT 대화를 불러올 수 없습니다\.?$|^Could not load this ChatGPT conversation\.?$|^Unable to load conversation\b.{0,60}$/;
+  const ERROR_XPATH = `//text()[${ERROR_PHRASES.map(p => `contains(., '${p}')`).join(' or ')}]`;
+  const ERROR_TEXT = new RegExp(ERROR_PHRASES.join('|'));
   // Places where the error text can appear as content rather than as ChatGPT's error UI.
   const CONTENT_AREAS = '[data-message-author-role], article, [contenteditable], textarea, pre, code, .markdown';
   const COMPOSER = '#prompt-textarea';
@@ -29,6 +34,12 @@
   let reloadCancelled = false;
   let reloadSent = false;
   let reloadRefused = '';
+  // Reloads this tab already had in the window (from the background), for the backoff.
+  let recentReloads = 0;
+  // Not before this time, after the background reported a newer or longer limit.
+  let notBefore = 0;
+  // Conversation-load 429s seen before this page loaded (from the background's history).
+  let recent429 = [];
 
   const host = document.createElement('div');
   host.id = 'retry-after-monitor';
@@ -38,7 +49,7 @@
       [hidden] { display: none !important; }
       .panel { position: fixed; right: 16px; bottom: 96px; z-index: 2147483647; box-sizing: border-box;
         width: 284px; max-width: calc(100vw - 32px); padding: 8px 12px 12px;
-        font-family: inherit; font-size: 13px; line-height: 1.45; color: #eef4f2; color-scheme: dark;
+        font-family: ui-sans-serif, system-ui, -apple-system, "Segoe UI", Roboto, "Noto Sans KR", "Malgun Gothic", sans-serif; font-size: 13px; line-height: 1.45; color: #eef4f2; color-scheme: dark;
         word-break: keep-all; overflow-wrap: break-word;
         background: #1a2022; border: 1px solid rgba(255,255,255,.09); border-radius: 12px;
         box-shadow: 0 12px 32px rgba(0,0,0,.32); }
@@ -61,8 +72,7 @@
       .note { margin-top: 10px; padding-top: 8px; border-top: 1px solid rgba(255,255,255,.09); }
       /* No divider when nothing is listed above the note. */
       .rows:empty + .note, .rows:empty + .note[hidden] + .note { margin-top: 4px; padding-top: 0; border-top: 0; }
-      .note small { display: block; margin-top: 1px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;
-        font-size: 12px; color: #9fb3ae; }
+      .note small { display: block; margin-top: 2px; overflow-wrap: anywhere; font-size: 12px; color: #9fb3ae; }
       .reload { display: flex; align-items: center; justify-content: space-between; gap: 10px; }
       .reload-text { font-variant-numeric: tabular-nums; }
       .cancel { flex: none; padding: 3px 10px; border: 0; border-radius: 7px; background: rgba(255,255,255,.1); }
@@ -150,9 +160,11 @@
     }
     return false;
   }
+  // Cheap recheck of the error already found: still in the page, still visible, still the error UI.
+  // Catches it being hidden by CSS, which the observer doesn't watch.
+  const errorStillShown = () => !!errorNode?.isConnected && isErrorUi(errorNode);
   // Whether a DOM change could have brought the error text in. Streaming replies change the DOM
   // constantly, and searching the whole page each time is costly on long chats.
-  const ERROR_TEXT = /대화를 불러올 수 없습니다|Unable to load conversation/;
   const mentionsError = r => r.type === 'characterData'
     ? ERROR_TEXT.test(r.target.data)
     : [...r.addedNodes].some(n => ERROR_TEXT.test(n.textContent || ''));
@@ -167,34 +179,53 @@
     return key ? i18n(key) : (method === 'GET' ? '' : method + ' ') + shortenPath(endpointOf(url));
   };
 
-  function describe(d) {
+  // The latest conversation-load 429 for this chat from before this page loaded, as a line,
+  // so a reload doesn't hide that the limit was hit moments ago.
+  function earlierLimit(now) {
+    const r = recent429.filter(h => convId && h.url.includes(convId) && h.at < (performance.timeOrigin || now)).sort((a, b) => b.at - a.at)[0];
+    if (!r) return null;
+    const wait = r.until != null ? formatWait(Math.max(0, Math.round((r.until - r.at) / 1000))) : '?';
+    return i18n('diagRecent429', formatWait(Math.max(0, Math.round((now - r.at) / 1000))), wait);
+  }
+
+  function describe(d, now) {
     const e = d.event;
     const where = e ? `${e.method} ${shortenPath(e.url)}` : '';
     switch (d.kind) {
+      // ChatGPT blocks its own Retry until the same time the countdown shows.
+      case 'waiting': return [i18n('diagWaiting'), i18n('diagWaitingDetail')];
       case 'elapsed': return [i18n('diagElapsed'), i18n('diagElapsedDetail', e.raw, where)];
       case 'nowait': return [i18n('diagNoWait'), i18n('diagNoWaitDetail', where)];
+      case 'notRequested': return [i18n('diagNotRequested'), i18n('diagNotRequestedDetail', e.error), earlierLimit(now)];
       case 'neterr': return e.afterHeaders != null
-        ? [i18n('diagNetErrAfterHeaders', e.error), i18n('diagNetErrAfterHeadersDetail', where, e.afterHeaders)]
-        : [i18n('diagNetErr', e.error), where];
-      case 'ok': return [i18n('diagOk'), `${where} · ${e.status}`];
-      default: return [i18n('diagNone'), i18n('diagNoneDetail')];
+        ? [i18n('diagNetErrAfterHeaders', e.error), i18n('diagNetErrAfterHeadersDetail', where, e.afterHeaders), earlierLimit(now)]
+        : [i18n('diagNetErr', e.error), where, earlierLimit(now)];
+      case 'ok': return [i18n('diagOk'), `${where} · ${e.status}`, earlierLimit(now)];
+      default: return [i18n('diagNone'), i18n('diagNoneDetail'), earlierLimit(now)];
     }
   }
 
   let diagShown = '';
-  function renderDiagnosis(d) {
-    // A running countdown already explains the error.
-    if (!errorSince || d.kind === 'waiting') { diag.hidden = true; diagShown = ''; return false; }
-    const [headText, detailText] = describe(d);
+  function renderDiagnosis(d, now) {
+    if (!errorSince) { diag.hidden = true; diagShown = ''; return false; }
+    const lines = describe(d, now).filter(Boolean);
     // Rebuild only on change, so screen readers announce it once and tooltips don't flicker.
-    if (diagShown !== headText + detailText) {
-      diagShown = headText + detailText;
+    // The "ago" in the earlier-limit line changes every second, so it isn't part of the key.
+    const keyText = lines.slice(0, 2).join('\n') + (lines.length > 2 ? '\n+' : '');
+    if (diagShown !== keyText) {
+      diagShown = keyText;
       const head = document.createElement('div');
-      head.textContent = headText;
-      const detail = document.createElement('small');
-      detail.textContent = detailText;
-      if (d.event) detail.title = d.event.url;
-      diag.replaceChildren(head, detail);
+      head.textContent = lines[0];
+      const details = lines.slice(1).map(text => {
+        const detail = document.createElement('small');
+        detail.textContent = text;
+        return detail;
+      });
+      if (d.event && details[0]) details[0].title = d.event.url;
+      diag.replaceChildren(head, ...details);
+    } else if (lines.length > 2) {
+      const last = diag.lastElementChild;
+      if (last && last.textContent !== lines[2]) last.textContent = lines[2];
     }
     diag.hidden = false;
     return true;
@@ -206,14 +237,18 @@
     if (!autoReload || reloadCancelled || !errorSince) return null;
     if (d.kind !== 'waiting' && d.kind !== 'elapsed') return null;
     // The notice delay is only for an error that first showed up after the wait had already passed.
-    return errorSince >= d.event.until ? errorSince + RELOAD_NOTICE_MS : d.event.until + RELOAD_GRACE_MS;
+    const base = errorSince >= d.event.until ? errorSince + RELOAD_NOTICE_MS : d.event.until + RELOAD_GRACE_MS;
+    // The server can keep refusing after its own wait, so each further reload of this tab waits longer.
+    const backoff = RELOAD_BACKOFF_MS[Math.min(recentReloads, RELOAD_BACKOFF_MS.length - 1)];
+    return Math.max(base + backoff, notBefore);
   }
 
   function renderReload(d, now) {
     let text = null;
     let cancellable = true;
     if (reloadRefused) {
-      text = reloadRefused === 'limit' ? i18n('reloadLimited', RELOAD_LIMIT, RELOAD_WINDOW_MS / 60000) : i18n('reloadFailed');
+      text = reloadRefused === 'limit' ? i18n('reloadLimited', RELOAD_LIMIT, RELOAD_WINDOW_MS / 60000)
+        : reloadRefused === 'unverified' ? i18n('reloadSkipped') : i18n('reloadFailed');
       cancellable = false;
     } else if (reloadSent) {
       text = i18n('reloadNow');
@@ -223,13 +258,20 @@
       if (at != null) {
         if (at > now) text = i18n('reloadIn', formatWait(Math.ceil((at - now) / 1000)));
         else if (draftPending()) text = i18n('reloadPausedDraft');
+        // Last look right before asking: the error must still be on screen and the URL still
+        // this conversation (an in-page navigation may not have touched the DOM yet).
+        else if (!errorStillShown() || conversationIdFromPath(location.pathname) !== convId) scheduleCheck(0);
         else {
           reloadSent = true;
           text = i18n('reloadNow');
           cancellable = false;
-          send({ type: 'reloadTab' }, r => {
+          send({ type: 'reloadTab', convId }, r => {
             if (r?.ok) return;
-            reloadRefused = r?.reason === 'limit' ? 'limit' : 'error';
+            reloadSent = false;
+            // The background saw a newer or longer limit: wait for it, then decide again.
+            if (r?.reason === 'waiting' && r.until) notBefore = r.until + RELOAD_GRACE_MS;
+            else if (r?.reason === 'disabled') autoReload = false;
+            else reloadRefused = ['limit', 'unverified'].includes(r?.reason) ? r.reason : 'error';
             render();
           });
         }
@@ -259,6 +301,10 @@
 
   function render() {
     const now = Date.now();
+    // Every tick: an in-page navigation can change the URL before any DOM change, and the
+    // error can be hidden by CSS without one. Both are cheap to look at.
+    syncConversation();
+    if (errorSince && !errorStillShown()) scheduleCheck(0);
     // Expired entries are removed by the background worker; just stop showing them.
     const list = Object.values(entries).filter(e => staleAt(e) > now)
       // Longest wait first; entries without a known wait go last.
@@ -278,7 +324,9 @@
       r.el.className = `row ${state}`;
       setText(r.label, nameOf(e.method, e.path));
       setText(r.t, time);
-      const title = `${e.method} ${e.path}\nRetry-After: ${e.raw ?? i18n('rowTooltipNoHeader')}\n${i18n('rowTooltipReceived', new Date(e.at).toLocaleTimeString())}`;
+      const title = `${e.method} ${e.path}\nRetry-After: ${e.raw ?? i18n('rowTooltipNoHeader')}` +
+        (e.rawHistory != null ? `\nx-oai-history-initial-retry-after: ${e.rawHistory}` : '') +
+        `\n${i18n('rowTooltipReceived', new Date(e.at).toLocaleTimeString())}`;
       if (r.el.title !== title) r.el.title = title;
       const span = e.until != null ? e.until - e.at : 0;
       // The bar drains while waiting and fills up once retrying is allowed.
@@ -290,7 +338,7 @@
     if (els.length !== rows.children.length || els.some((el, i) => rows.children[i] !== el)) rows.replaceChildren(...els);
 
     const d = errorSince ? diagnose(events, { convId, since, now }) : { kind: 'none' };
-    const diagnosed = renderDiagnosis(d);
+    const diagnosed = renderDiagnosis(d, now);
     const reloading = renderReload(d, now);
     panel.hidden = !(list.some(e => e.at > hiddenAt) || ((diagnosed || reloading) && errorSince > hiddenAt));
   }
@@ -317,12 +365,15 @@
     errorSince = shown ? Date.now() : 0;
     render();
   }
+  function scheduleCheck(delay) {
+    if (!checkTimer) checkTimer = setTimeout(check, delay);
+  }
   observer = new MutationObserver(records => {
     syncConversation();
     // While the error is shown, any change may remove it; otherwise only changes carrying its text matter.
     const mentioned = !errorSince && records.some(mentionsError);
     if (mentioned) pendingChecks = 4;
-    if (!checkTimer && (errorSince || mentioned)) checkTimer = setTimeout(check, 250);
+    if (errorSince || mentioned) scheduleCheck(250);
   });
   observer.observe(document.body, { childList: true, subtree: true, characterData: true });
 
@@ -346,6 +397,8 @@
     send({ type: 'get' }, r => {
       entries = r?.entries || {};
       events = r?.events || [];
+      recent429 = r?.recent429 || [];
+      recentReloads = r?.recentReloads || 0;
       check();
       render();
     });

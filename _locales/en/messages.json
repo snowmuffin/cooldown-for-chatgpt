@@ -118,6 +118,40 @@
   "diagNoneDetail": {
     "message": "No requests for this chat were seen on this page."
   },
+  "diagWaiting": {
+    "message": "ChatGPT's own Retry button stays blocked until this countdown ends.",
+    "description": "ChatGPT itself refuses to retry loading the chat until this time, without sending a request."
+  },
+  "diagWaitingDetail": {
+    "message": "Reloading clears that block, but the server may still answer 429."
+  },
+  "diagNotRequested": {
+    "message": "ChatGPT didn't request this chat on this page.",
+    "description": "The conversation was never requested; only its setup request ran and was cancelled."
+  },
+  "diagNotRequestedDetail": {
+    "message": "Its setup request was cancelled ($ERROR$). Reloading may help.",
+    "placeholders": {
+      "error": {
+        "content": "$1",
+        "example": "net::ERR_ABORTED"
+      }
+    }
+  },
+  "diagRecent429": {
+    "message": "Last 429 for this chat: $AGO$ ago (wait $WAIT$)",
+    "description": "A rate limit seen for this chat before the page was reloaded.",
+    "placeholders": {
+      "ago": {
+        "content": "$1",
+        "example": "3:12"
+      },
+      "wait": {
+        "content": "$2",
+        "example": "0:34"
+      }
+    }
+  },
   "reloadIn": {
     "message": "Reloading this tab in $TIME$",
     "placeholders": {
@@ -149,6 +183,9 @@
   "reloadFailed": {
     "message": "Couldn't reload this tab."
   },
+  "reloadSkipped": {
+    "message": "Auto reload skipped: the rate limit for this chat couldn't be confirmed."
+  },
   "reloadCancel": {
     "message": "Cancel",
     "description": "Button that cancels the pending auto reload."
@@ -158,7 +195,7 @@
     "description": "Popup switch label."
   },
   "popupAutoReloadHelp": {
-    "message": "Only when ChatGPT can't load a chat because of a 429. Up to $COUNT$ times in $MINUTES$ minutes per tab.",
+    "message": "Only when ChatGPT can't load a chat because of a 429. Up to $COUNT$ times in $MINUTES$ minutes per tab, waiting longer each time.",
     "placeholders": {
       "count": {
         "content": "$1",

@@ -10,4 +10,16 @@ function parseRetryAfter(value, now) {
   return Number.isNaN(t) ? null : t;
 }
 
-if (typeof module !== 'undefined') module.exports = { parseRetryAfter };
+// ChatGPT's client reads this header (seconds) next to Retry-After and blocks loading a
+// conversation, including its own Retry button, until the later of the two.
+const HISTORY_RETRY_HEADER = 'x-oai-history-initial-retry-after';
+
+// When retrying is allowed according to both headers, or null if neither gives a time.
+function cooldownUntil(retryAfter, historyRetryAfter, now) {
+  const times = [parseRetryAfter(retryAfter, now)];
+  if (historyRetryAfter != null && /^\d+$/.test(String(historyRetryAfter).trim())) times.push(now + Number(historyRetryAfter) * 1000);
+  const known = times.filter(t => t != null);
+  return known.length ? Math.max(...known) : null;
+}
+
+if (typeof module !== 'undefined') module.exports = { parseRetryAfter, cooldownUntil, HISTORY_RETRY_HEADER };

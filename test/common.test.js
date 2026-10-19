@@ -88,3 +88,18 @@ console.log('ok - common');
   assert.equal(languageOf('../../x'), 'en', 'anything else falls back to English');
   console.log('ok - i18n with loaded messages, languageOf');
 }
+
+// notRequested: setup request cancelled and the conversation never requested on this page.
+{
+  const { diagnose } = require('../common.js');
+  const id = '6acde5a1-ee0c-83ee-8d06-5d0924e7163a';
+  const init = { kind: 'neterr', at: 100, method: 'POST', url: '/backend-api/conversation/init', error: 'net::ERR_ABORTED', afterHeaders: null };
+  assert.equal(diagnose([init], { convId: id, since: 0, now: 200 }).kind, 'notRequested');
+  const loaded = { kind: 'ok', at: 150, sent: 120, method: 'GET', url: `/backend-api/conversations/${id}?num_turns=10`, status: 200 };
+  assert.equal(diagnose([init, loaded], { convId: id, since: 0, now: 200 }).kind, 'ok', 'cancelled init is noise once the chat itself was requested');
+  const limited = { kind: '429', at: 140, method: 'GET', url: `/backend-api/conversations/${id}`, raw: '34', until: 34_140 };
+  assert.equal(diagnose([init, limited], { convId: id, since: 0, now: 200 }).kind, 'waiting', 'a 429 on the chat itself wins');
+  const otherAbort = { ...init, url: `/backend-api/conversations/${id}` };
+  assert.equal(diagnose([otherAbort], { convId: id, since: 0, now: 200 }).kind, 'neterr', 'an aborted chat request stays a network error');
+  console.log('ok - diagnose notRequested');
+}

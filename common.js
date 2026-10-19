@@ -39,6 +39,9 @@ function staleAt(entry) {
 // Auto reload limit, enforced per tab by the background worker.
 const RELOAD_LIMIT = 3;
 const RELOAD_WINDOW_MS = 10 * 60 * 1000;
+// Extra wait before the next auto reload, by how many the tab already had in the window.
+// The server can keep refusing after Retry-After, so each further try waits longer.
+const RELOAD_BACKOFF_MS = [0, 30 * 1000, 90 * 1000];
 
 // Message key naming a well-known ChatGPT endpoint, or null to show the path instead.
 const LOAD_PATH = new RegExp(`^/backend-api/conversations?/${UUID.source}$`);
@@ -82,12 +85,23 @@ const endpointOf = url => url.split('?')[0];
 //   waiting — a 429 whose Retry-After has not passed yet
 //   elapsed — a 429 was observed and its Retry-After has passed; recovery is unconfirmed
 //   nowait  — a 429 was observed without Retry-After, so no wait time is known
+//   notRequested — the setup request (conversation/init) was cancelled and the conversation
+//             itself was never requested on this page
 //   neterr  — the request failed at the network level (event.afterHeaders tells if a status arrived first)
 //   ok      — no failure observed, or a later request recovered from it; the error has some other cause
 //   none    — nothing observed for this conversation
 function diagnose(events, { convId, since, now }) {
-  const relevant = events.filter(e => e.at >= since && concernsConversation(e.url, convId));
-  if (!relevant.length) return { kind: 'none' };
+  const observed = events.filter(e => e.at >= since && concernsConversation(e.url, convId));
+  if (!observed.length) return { kind: 'none' };
+  // ChatGPT cancels its own setup request now and then. That is noise once the conversation
+  // itself was requested; it only matters when the page never asked for the conversation.
+  const setupCancelled = e => e.kind === 'neterr' && endpointOf(e.url) === '/backend-api/conversation/init';
+  const requested = observed.some(e => endpointName(e.method, e.url) === 'epLoad');
+  if (!requested) {
+    const cancelled = observed.filter(setupCancelled).pop();
+    if (cancelled && !observed.some(e => e.kind !== 'ok' && !setupCancelled(e))) return { kind: 'notRequested', event: cancelled };
+  }
+  const relevant = requested ? observed.filter(e => !setupCancelled(e)) : observed;
   const failure = [...relevant].reverse().find(e => e.kind !== 'ok');
   if (!failure) return { kind: 'ok', event: relevant[relevant.length - 1] };
   // Same rule as clearing a cooldown: only a success on the same method and endpoint that was
@@ -103,7 +117,7 @@ function diagnose(events, { convId, since, now }) {
 
 if (typeof module !== 'undefined') {
   module.exports = {
-    CONVERSATION_LOAD, READY_LINGER_MS, NO_HEADER_TTL_MS, RELOAD_LIMIT, RELOAD_WINDOW_MS,
+    CONVERSATION_LOAD, READY_LINGER_MS, NO_HEADER_TTL_MS, RELOAD_LIMIT, RELOAD_WINDOW_MS, RELOAD_BACKOFF_MS, endpointOf,
     LANGUAGES, DEFAULT_LANGUAGE, languageOf, setMessages, i18n,
     entryKey, staleAt, shortenPath, endpointName, formatWait, conversationIdFromPath, concernsConversation, diagnose,
   };

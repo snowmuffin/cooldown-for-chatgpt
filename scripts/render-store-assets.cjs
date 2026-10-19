@@ -15,7 +15,7 @@ const CONV = '6acde5a1-ee0c-83ee-8d06-5d0924e7163a';
 
 const COPY = {
   en: {
-    error: 'Unable to load conversation', retry: 'Retry',
+    error: 'Could not load this ChatGPT conversation', retry: 'Retry',
     shots: [
       ['See exactly when you can retry', 'A live countdown from the Retry-After header, and an optional reload when it ends.'],
       ['Know what actually failed', 'When the load error appears, the panel reports what was observed for that conversation.'],

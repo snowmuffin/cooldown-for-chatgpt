@@ -24,8 +24,9 @@ const el = (tag, cls, text) => { const e = document.createElement(tag); if (cls)
 // What the response said about waiting, as a duration from when it arrived ("Wait 1:47").
 // An unparseable value is shown as sent.
 function waitText(h) {
-  if (h.raw == null) return i18n('rowNoHeader');
-  const until = parseRetryAfter(h.raw, h.at);
+  // Newer entries carry `until`, which also accounts for ChatGPT's history retry header.
+  const until = h.until !== undefined ? h.until : parseRetryAfter(h.raw, h.at);
+  if (until == null && h.raw == null) return i18n('rowNoHeader');
   return until == null ? h.raw : i18n('popupWait', formatWait(Math.max(0, Math.round((until - h.at) / 1000))));
 }
 

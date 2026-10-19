@@ -8,14 +8,14 @@ The ChatGPT web app does not surface the `Retry-After` header the server sends. 
 
 ## Features
 
-- Reads `Retry-After` (delta-seconds or HTTP-date) from 429 responses on `chatgpt.com/backend-api/*` and shows a countdown
+- Reads `Retry-After` (delta-seconds or HTTP-date) and ChatGPT's `x-oai-history-initial-retry-after` from 429 responses on `chatgpt.com/backend-api/*` and counts down to the later of the two. ChatGPT's own client blocks loading a conversation, including its Retry button, until that same time without sending a request, so the countdown shows when Retry can work at all
 - Red while waiting, green once retrying is allowed, yellow "no Retry-After" for 429s without the header
 - Clears an entry automatically when the same endpoint later returns a successful response
 - Shows a `429` badge on the toolbar icon while any endpoint is limited
 - Countdown survives page reloads
-- **Error diagnosis:** when ChatGPT shows its conversation load error, the panel reports what was actually observed for that conversation on this page: a 429 whose wait has elapsed (recovery unconfirmed), a network-level failure (and whether a status had already arrived), a last request that succeeded, or nothing recorded. It never concludes "not a 429" from the absence of data
+- **Error diagnosis:** when ChatGPT shows its conversation load error, the panel reports what was actually observed for that conversation on this page: a running wait (with a note that ChatGPT blocks its own Retry until then), a 429 whose wait has elapsed (recovery unconfirmed), a page that never requested the chat because ChatGPT cancelled its own setup request, a network-level failure (and whether a status had already arrived), a last request that succeeded, or nothing recorded. A 429 for the chat from before a reload is still mentioned. It never concludes "not a 429" from the absence of data
 - **History:** the toolbar popup lists the last 50 rate-limit responses (method, full path and query, `Retry-After`) and network failures on conversation requests
-- **Auto reload (optional, off by default):** when ChatGPT can't load a chat because of a 429, reloads that tab once `Retry-After` has passed. Only the tab that hit the error is reloaded (`chrome.tabs.reload` on the sender tab), never before the wait is over, never while the message box holds unsent text, and at most 3 times in 10 minutes per tab. The panel shows the countdown with a Cancel button
+- **Auto reload (optional, off by default):** when ChatGPT can't load a chat because of a 429, reloads that tab once the wait has passed. Only the tab that hit the error is reloaded (`chrome.tabs.reload` on the sender tab). The background re-checks every request (setting still on, same document and conversation, a 429 observed for them and no limit still pending) and handles them one at a time, so the cap of 3 reloads per tab in 10 minutes holds. Each further reload of a tab waits longer (+30 s, +90 s). Never before the wait is over, never while the message box holds unsent text. The panel shows the countdown with a Cancel button
 - English (default) and Korean UI, chosen in the popup
 
 The extension only **reads** response headers. It never blocks or modifies requests, never sends requests of its own, and sends no data anywhere; the optional auto reload is the same as pressing reload after the server's wait. See the [privacy policy](docs/privacy.html).
@@ -82,7 +82,7 @@ node scripts/render-store-assets.cjs   # uses the installed Google Chrome
 
 ## Limitations
 
-Waiting out `Retry-After` does not always fix ChatGPT's "Unable to load conversation" error. The error can also come from network-level failures or other server-side problems, and the server can answer with a new 429 after the wait. The panel reports what was actually observed for the conversation so these cases can be told apart; it never claims a cause it did not see.
+Waiting out the countdown does not always fix ChatGPT's "Could not load this ChatGPT conversation" error. The server can answer with a new 429 after the wait (observed: a 34 s wait followed by another 429 with 48 s), the page sometimes never requests the conversation after ChatGPT cancels its own setup request, and the error can come from network-level failures or other server-side problems. A full reload clears ChatGPT's in-page block on Retry, but not the server's limit. The panel reports what was actually observed for the conversation so these cases can be told apart; it never claims a cause it did not see.
 
 ## Contributing
 
