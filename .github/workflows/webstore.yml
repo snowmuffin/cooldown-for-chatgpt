@@ -1,0 +1,70 @@
+name: Chrome Web Store
+
+on:
+  workflow_dispatch:
+    inputs:
+      operation:
+        description: 'status: check connection; upload: ZIP only; publish: upload and submit for review'
+        type: choice
+        options: [status, upload, publish]
+        default: status
+        required: true
+      version:
+        description: 'Exact manifest version to upload (required for upload/publish)'
+        type: string
+        required: false
+
+permissions:
+  contents: read
+
+concurrency:
+  group: chrome-web-store
+  cancel-in-progress: false
+
+jobs:
+  webstore:
+    name: Store connection and release
+    if: github.ref == 'refs/heads/main'
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    permissions:
+      contents: read
+      id-token: write
+    steps:
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4
+        with:
+          persist-credentials: false
+      - uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020 # v4
+        with:
+          node-version: '22'
+      - name: Run tests
+        run: |
+          node test/retry-after.test.js
+          node test/common.test.js
+          node test/background.test.js
+          node test/i18n.test.js
+          node test/icons.test.js
+          node test/webstore.test.js
+      - name: Build and validate ZIP
+        if: inputs.operation != 'status'
+        run: |
+          node scripts/package.cjs
+          unzip -t dist/cooldown-for-chatgpt-*.zip
+      - name: Authenticate to Google
+        id: auth
+        uses: google-github-actions/auth@7c6bc770dae815cd3e89ee6cdf493a5fab2cc093 # v3
+        with:
+          project_id: ${{ vars.GCP_PROJECT_ID }}
+          workload_identity_provider: ${{ vars.GCP_WORKLOAD_IDENTITY_PROVIDER }}
+          service_account: ${{ vars.GCP_SERVICE_ACCOUNT }}
+          token_format: access_token
+          access_token_scopes: https://www.googleapis.com/auth/chromewebstore
+          create_credentials_file: false
+      - name: Run store operation
+        env:
+          CWS_ACCESS_TOKEN: ${{ steps.auth.outputs.access_token }}
+          CWS_PUBLISHER_ID: ${{ vars.CWS_PUBLISHER_ID }}
+          CWS_EXTENSION_ID: ${{ vars.CWS_EXTENSION_ID }}
+          CWS_OPERATION: ${{ inputs.operation }}
+          CWS_EXPECTED_VERSION: ${{ inputs.version }}
+        run: node scripts/webstore.cjs
