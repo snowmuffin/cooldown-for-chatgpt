@@ -139,11 +139,23 @@
     }
     return false;
   }
+  // The text node of the error UI currently shown, so later checks don't have to search again.
+  let errorNode = null;
   function errorVisible() {
+    if (errorNode?.isConnected && isErrorUi(errorNode)) return true;
+    errorNode = null;
     const found = document.evaluate(ERROR_XPATH, document.body, null, XPathResult.ORDERED_NODE_SNAPSHOT_TYPE, null);
-    for (let i = 0; i < found.snapshotLength; i++) if (isErrorUi(found.snapshotItem(i))) return true;
+    for (let i = 0; i < found.snapshotLength; i++) {
+      if (isErrorUi(found.snapshotItem(i))) { errorNode = found.snapshotItem(i); return true; }
+    }
     return false;
   }
+  // Whether a DOM change could have brought the error text in. Streaming replies change the DOM
+  // constantly, and searching the whole page each time is costly on long chats.
+  const ERROR_TEXT = /대화를 불러올 수 없습니다|Unable to load conversation/;
+  const mentionsError = r => r.type === 'characterData'
+    ? ERROR_TEXT.test(r.target.data)
+    : [...r.addedNodes].some(n => ERROR_TEXT.test(n.textContent || ''));
   // A reload would throw away text the user has typed but not sent.
   function draftPending() {
     const c = document.querySelector(COMPOSER);
@@ -283,22 +295,35 @@
     panel.hidden = !(list.some(e => e.at > hiddenAt) || ((diagnosed || reloading) && errorSince > hiddenAt));
   }
 
+  // Same-document navigation is noticed on the next DOM change, which ChatGPT always makes.
+  function syncConversation() {
+    const id = conversationIdFromPath(location.pathname);
+    if (id === convId) return;
+    convId = id;
+    // Small slack: the new conversation's first response can land just before this runs.
+    // Older events naming the previous conversation are excluded by id anyway.
+    since = Date.now() - 1000;
+  }
+
   let checkTimer = 0;
+  // Error text that arrived hidden (e.g. while fading in) is rechecked a few times.
+  let pendingChecks = 0;
   function check() {
     checkTimer = 0;
-    const id = conversationIdFromPath(location.pathname);
-    if (id !== convId) {
-      convId = id;
-      // Small slack: the new conversation's first response can land just before this check runs.
-      // Older events naming the previous conversation are excluded by id anyway.
-      since = Date.now() - 1000;
-    }
+    syncConversation();
     const shown = errorVisible();
+    if (!shown && pendingChecks > 0) { pendingChecks--; checkTimer = setTimeout(check, 500); }
     if (shown === !!errorSince) return;
     errorSince = shown ? Date.now() : 0;
     render();
   }
-  observer = new MutationObserver(() => { if (!checkTimer) checkTimer = setTimeout(check, 250); });
+  observer = new MutationObserver(records => {
+    syncConversation();
+    // While the error is shown, any change may remove it; otherwise only changes carrying its text matter.
+    const mentioned = !errorSince && records.some(mentionsError);
+    if (mentioned) pendingChecks = 4;
+    if (!checkTimer && (errorSince || mentioned)) checkTimer = setTimeout(check, 250);
+  });
   observer.observe(document.body, { childList: true, subtree: true, characterData: true });
 
   chrome.runtime.onMessage.addListener(msg => {

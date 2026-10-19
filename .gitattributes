@@ -1,0 +1,3 @@
+# LF everywhere, so the store zip is byte-for-byte reproducible on any OS.
+* text=auto eol=lf
+*.png binary
