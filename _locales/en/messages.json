@@ -183,9 +183,6 @@
   "reloadFailed": {
     "message": "Couldn't reload this tab."
   },
-  "reloadSkipped": {
-    "message": "Auto reload skipped: the rate limit for this chat couldn't be confirmed."
-  },
   "reloadCancel": {
     "message": "Cancel",
     "description": "Button that cancels the pending auto reload."

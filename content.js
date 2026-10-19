@@ -247,8 +247,10 @@
     let text = null;
     let cancellable = true;
     if (reloadRefused) {
-      text = reloadRefused === 'limit' ? i18n('reloadLimited', RELOAD_LIMIT, RELOAD_WINDOW_MS / 60000)
-        : reloadRefused === 'unverified' ? i18n('reloadSkipped') : i18n('reloadFailed');
+      // Keep an unverified refusal latched to prevent repeat attempts, without a notice.
+      text = reloadRefused === 'unverified' ? null
+        : reloadRefused === 'limit' ? i18n('reloadLimited', RELOAD_LIMIT, RELOAD_WINDOW_MS / 60000)
+        : i18n('reloadFailed');
       cancellable = false;
     } else if (reloadSent) {
       text = i18n('reloadNow');

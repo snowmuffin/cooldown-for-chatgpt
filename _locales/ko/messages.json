@@ -154,9 +154,6 @@
   "reloadFailed": {
     "message": "이 탭을 새로고침하지 못했습니다."
   },
-  "reloadSkipped": {
-    "message": "자동 새로고침 건너뜀: 이 대화의 사용량 제한을 확인할 수 없습니다."
-  },
   "reloadCancel": {
     "message": "취소"
   },
