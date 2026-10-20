@@ -35,8 +35,12 @@ function mutate(tabId, fn) {
   });
 }
 
+// The sidebar list is refetched constantly and often limited on its own, without affecting
+// chats, so it would keep the badge lit for nothing. The panel and popup still list it.
+const badgeWorthy = k => { const [method, path] = k.split(' '); return endpointName(method, path) !== 'epList'; };
+
 async function publish(tabId, entries) {
-  chrome.action.setBadgeText({ tabId, text: Object.keys(entries).length ? '429' : '' }).catch(() => {});
+  chrome.action.setBadgeText({ tabId, text: Object.keys(entries).some(badgeWorthy) ? '429' : '' }).catch(() => {});
   chrome.tabs.sendMessage(tabId, { type: 'update', entries }).catch(() => {});
 }
 

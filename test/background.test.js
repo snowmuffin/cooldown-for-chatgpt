@@ -116,6 +116,16 @@ test('expiry is done by the background alarm and clears the badge without a cont
   assert.equal(h.alarms.prune, undefined);
 });
 
+test('a 429 on the sidebar list alone does not light the badge', async () => {
+  const h = setup();
+  const list = 'https://chatgpt.com/backend-api/conversations?offset=0&limit=28&order=updated';
+  await h.fire('headers', r429({ url: list, requestId: 'l', timeStamp: h.now(), responseHeaders: [] }));
+  assert.ok(h.storage['tab:1']['GET /backend-api/conversations'], 'still recorded for the panel');
+  assert.equal(h.badges.at(-1).text, '');
+  await h.fire('headers', r429({ requestId: 'c', timeStamp: h.now() }));
+  assert.equal(h.badges.at(-1).text, '429');
+});
+
 test('a newer 429 for the same key survives the prune scheduled for the old one', async () => {
   const h = setup();
   const t0 = h.now();

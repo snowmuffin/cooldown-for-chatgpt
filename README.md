@@ -11,7 +11,7 @@ The ChatGPT web app does not surface the `Retry-After` header the server sends. 
 - Reads `Retry-After` (delta-seconds or HTTP-date) and ChatGPT's `x-oai-history-initial-retry-after` from 429 responses on `chatgpt.com/backend-api/*` and counts down to the later of the two. ChatGPT's own client blocks loading a conversation, including its Retry button, until that same time without sending a request, so the countdown shows when Retry can work at all
 - Red while waiting, green once retrying is allowed, yellow "no Retry-After" for 429s without the header
 - Clears an entry automatically when the same endpoint later returns a successful response
-- Shows a `429` badge on the toolbar icon while any endpoint is limited
+- Shows a `429` badge on the toolbar icon while a limit is active (the sidebar chat list, which ChatGPT refetches constantly, is left out)
 - Countdown survives page reloads
 - **Error diagnosis:** when ChatGPT shows its conversation load error, the panel reports what was actually observed for that conversation on this page: a running wait (with a note that ChatGPT blocks its own Retry until then), a 429 whose wait has elapsed (recovery unconfirmed), a page that never requested the chat because ChatGPT cancelled its own setup request, a network-level failure (and whether a status had already arrived), a last request that succeeded, or nothing recorded. A 429 for the chat from before a reload is still mentioned. It never concludes "not a 429" from the absence of data
 - **History:** the toolbar popup lists the last 50 rate-limit responses (method, full path and query, `Retry-After`) and network failures on conversation requests
