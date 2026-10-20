@@ -236,6 +236,7 @@
   function reloadAt(d) {
     if (!autoReload || reloadCancelled || !errorSince) return null;
     if (d.kind !== 'waiting' && d.kind !== 'elapsed') return null;
+    if (!loadsConversation(d.event.url, convId)) return null;
     // The notice delay is only for an error that first showed up after the wait had already passed.
     const base = errorSince >= d.event.until ? errorSince + RELOAD_NOTICE_MS : d.event.until + RELOAD_GRACE_MS;
     // The server can keep refusing after its own wait, so each further reload of this tab waits longer.

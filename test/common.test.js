@@ -103,3 +103,15 @@ console.log('ok - common');
   assert.equal(diagnose([otherAbort], { convId: id, since: 0, now: 200 }).kind, 'neterr', 'an aborted chat request stays a network error');
   console.log('ok - diagnose notRequested');
 }
+
+// Only the request that loads that very conversation can justify an auto reload.
+{
+  const { loadsConversation } = require('../common.js');
+  const id = '6ad32d53-1e80-83ec-aa81-31ca848b5eca';
+  assert.equal(loadsConversation(`/backend-api/conversation/${id}`, id), true);
+  assert.equal(loadsConversation(`/backend-api/conversations/${id}?num_turns=10`, id), true);
+  assert.equal(loadsConversation('/backend-api/conversations?offset=0&limit=28', id), false);
+  assert.equal(loadsConversation('/backend-api/conversation/init', id), false);
+  assert.equal(loadsConversation(`/backend-api/conversation/${id}/stream_status`, id), false);
+  assert.equal(loadsConversation('/backend-api/conversation/00000000-0000-0000-0000-000000000000', id), false);
+}

@@ -80,6 +80,13 @@ function concernsConversation(url, convId) {
 
 const endpointOf = url => url.split('?')[0];
 
+// The request that loads this very conversation. Only its 429 can justify an auto reload;
+// limits on the sidebar list, conversation/init or other endpoints don't.
+function loadsConversation(url, convId) {
+  const p = endpointOf(url);
+  return LOAD_PATH.test(p) && p.endsWith(`/${convId}`);
+}
+
 // What the observed conversation-load events say about the current load error.
 // `events` are in chronological order and already limited to this document.
 //   waiting — a 429 whose Retry-After has not passed yet
@@ -119,6 +126,6 @@ if (typeof module !== 'undefined') {
   module.exports = {
     CONVERSATION_LOAD, READY_LINGER_MS, NO_HEADER_TTL_MS, RELOAD_LIMIT, RELOAD_WINDOW_MS, RELOAD_BACKOFF_MS, endpointOf,
     LANGUAGES, DEFAULT_LANGUAGE, languageOf, setMessages, i18n,
-    entryKey, staleAt, shortenPath, endpointName, formatWait, conversationIdFromPath, concernsConversation, diagnose,
+    entryKey, staleAt, shortenPath, endpointName, formatWait, conversationIdFromPath, concernsConversation, loadsConversation, diagnose,
   };
 }

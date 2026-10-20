@@ -245,6 +245,18 @@ test('reloadTab needs a 429 for this document and conversation, and the tab stil
   assert.deepEqual(h.reloads, []);
 });
 
+test('reloadTab ignores 429s on anything but loading this chat', async () => {
+  const h = setup();
+  const sender = readyToReload(h, 1);
+  const t = h.now();
+  for (const url of ['/backend-api/conversations?offset=0&limit=28', '/backend-api/conversation/init',
+    `/backend-api/conversation/${CONV}/stream_status`, `/backend-api/conversations/${OTHER}`]) {
+    h.storage['events:1'] = [{ kind: '429', at: t - 60_000, method: 'GET', url, raw: '34', until: t - 20_000, documentId: 'DOC-A' }];
+    assert.equal((await h.ask(reloadMsg, sender)).reason, 'unverified', url);
+  }
+  assert.deepEqual(h.reloads, []);
+});
+
 test('reloadTab is capped per tab and the cap expires', async () => {
   const h = setup();
   const t = h.now();

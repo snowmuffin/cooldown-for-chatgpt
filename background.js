@@ -177,7 +177,7 @@ async function checkAndReload(tabId, { convId }, sender) {
   if (!tab.url || conversationIdFromPath(new URL(tab.url).pathname) !== convId) return { ok: false, reason: 'unverified' };
   const [k, ek] = [key(tabId), eventsKey(tabId)];
   const stored = await chrome.storage.session.get([k, ek]);
-  const forConv = url => CONVERSATION_LOAD.test(endpointOf(url)) && url.includes(convId);
+  const forConv = url => loadsConversation(url, convId);
   const limits = (stored[ek] || []).filter(e => e.documentId === sender.documentId && e.kind === '429' && forConv(e.url));
   // Only a 429 observed for this very document and conversation justifies a reload.
   if (!limits.some(e => e.until != null)) return { ok: false, reason: 'unverified' };
